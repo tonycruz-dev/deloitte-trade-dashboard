@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { getDashboard } from "../api/dashboardApi";
 import BottomCountriesPanel from "../components/BottomCountriesPanel";
 import KpiCard from "../components/KpiCard";
@@ -17,17 +18,19 @@ const shellClasses =
   "relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.14),_transparent_26%),radial-gradient(circle_at_top_right,_rgba(13,148,136,0.12),_transparent_24%),linear-gradient(140deg,_#020817_0%,_#071525_38%,_#03111b_72%,_#02060f_100%)] text-white";
 
 function LoadingState() {
+  const { t } = useTranslation();
+
   return (
     <div className="relative z-10 flex min-h-screen items-center justify-center p-6">
       <div className="glass-panel w-full max-w-md px-8 py-10 text-center">
         <p className="text-xs uppercase tracking-[0.3em] text-cyan-300/80">
-          Customs Control
+          {t("dashboard.customsControl")}
         </p>
         <h2 className="mt-3 text-2xl font-semibold text-white">
-          Loading dashboard intelligence
+          {t("dashboard.loadingDashboardIntelligence")}
         </h2>
         <p className="mt-3 text-sm text-slate-300">
-          Retrieving trade declarations, goods value, and market movement.
+          {t("dashboard.loadingDescription")}
         </p>
       </div>
     </div>
@@ -45,7 +48,9 @@ function MessageState({
 }) {
   return (
     <div className="relative z-10 flex min-h-screen items-center justify-center p-6">
-      <div className={`glass-panel w-full max-w-lg px-8 py-10 text-center ${accentClassName}`}>
+      <div
+        className={`glass-panel w-full max-w-lg px-8 py-10 text-center ${accentClassName}`}
+      >
         <p className="text-xs uppercase tracking-[0.3em] text-cyan-300/80">
           {label}
         </p>
@@ -56,6 +61,7 @@ function MessageState({
 }
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   const [data, setData] = useState<DashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -78,7 +84,7 @@ export default function DashboardPage() {
         }
       } catch {
         if (isMounted) {
-          setError("Failed to load dashboard data.");
+          setError(t("dashboard.failedToLoad"));
         }
       } finally {
         if (isMounted) {
@@ -87,12 +93,12 @@ export default function DashboardPage() {
       }
     }
 
-    loadDashboard();
+    void loadDashboard();
 
     return () => {
       isMounted = false;
     };
-  }, [period, selectedCountry, tradeType]);
+  }, [period, selectedCountry, t, tradeType]);
 
   if (loading) {
     return (
@@ -114,7 +120,7 @@ export default function DashboardPage() {
         </div>
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,_rgba(2,6,23,0.22)_0%,_rgba(2,6,23,0.74)_100%)]" />
         <MessageState
-          label="Data Connection Error"
+          label={t("dashboard.dataConnectionError")}
           title={error}
           accentClassName="border-red-400/30"
         />
@@ -130,8 +136,8 @@ export default function DashboardPage() {
         </div>
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,_rgba(2,6,23,0.22)_0%,_rgba(2,6,23,0.74)_100%)]" />
         <MessageState
-          label="No Data"
-          title="No dashboard data found."
+          label={t("dashboard.noData")}
+          title={t("dashboard.noData")}
           accentClassName=""
         />
       </div>
@@ -157,12 +163,12 @@ export default function DashboardPage() {
         <div className="absolute right-3 top-[11.75rem] z-20 w-[min(34rem,calc(100%-1.5rem))] px-0 sm:right-10 sm:w-[min(38rem,calc(100%-5rem))] lg:right-20 lg:top-[12.2rem] xl:right-28">
           <div className="grid gap-4 md:grid-cols-2">
             <KpiCard
-              title="Total Goods Value"
+              title={t("dashboard.totalGoodsValue")}
               value={`£${data.totalGoodsValue.toLocaleString()}`}
               changePercentage={15}
             />
             <KpiCard
-              title="Total Customs Declarations"
+              title={t("dashboard.totalCustomsDeclarations")}
               value={data.totalDeclarations.toLocaleString()}
               changePercentage={15}
             />

@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import type { CountryMetricDto } from "../types/dashboard";
 
 type BottomCountriesPanelProps = {
@@ -20,7 +22,7 @@ function SmallSelect({
   label: string;
   value: string;
   onChange: (value: string) => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <label className="glass-pill flex min-w-[140px] items-center gap-2.5 pr-3 text-left">
@@ -48,14 +50,16 @@ export default function BottomCountriesPanel({
   onPeriodChange,
   countries,
 }: BottomCountriesPanelProps) {
+  const { t } = useTranslation();
+
   const declarationLabel =
     selectedTradeType === "Import"
-      ? "Total Import Customs Declarations"
+      ? t("dashboard.totalImportCustomsDeclarations")
       : selectedTradeType === "Export"
-        ? "Total Export Customs Declarations"
+        ? t("dashboard.totalExportCustomsDeclarations")
         : selectedTradeType === "Transit"
-          ? "Total Transit Customs Declarations"
-          : "Total Customs Declarations";
+          ? t("dashboard.totalTransitCustomsDeclarations")
+          : t("dashboard.totalCustomsDeclarations");
 
   return (
     <section className="glass-bottom-panel mx-auto w-full max-w-[1600px] rounded-[1.65rem] px-4 py-3 sm:px-5 lg:px-6">
@@ -64,21 +68,23 @@ export default function BottomCountriesPanel({
           <div className="flex flex-wrap items-center gap-2.5 text-sm">
             <div className="rounded-full border border-cyan-400/14 bg-slate-950/18 px-3.5 py-1.5 text-cyan-100/90 backdrop-blur-md">
               <span className="mr-2 text-[10px] uppercase tracking-[0.28em] text-cyan-300/70">
-                Category
+                {t("dashboard.category")}
               </span>
               <span className="font-medium text-white">{declarationLabel}</span>
             </div>
 
             <div className="rounded-full border border-cyan-400/10 bg-slate-950/14 px-3.5 py-1.5 text-slate-200 backdrop-blur-md">
               <span className="mr-2 text-[10px] uppercase tracking-[0.28em] text-cyan-300/70">
-                Ranking
+                {t("dashboard.ranking")}
               </span>
-              <span className="font-medium text-white">Top 5 Countries</span>
+              <span className="font-medium text-white">
+                {t("dashboard.top5Countries")}
+              </span>
             </div>
 
             <div className="rounded-full border border-cyan-400/10 bg-slate-950/14 px-3.5 py-1.5 text-sm text-slate-300 backdrop-blur-md">
               <span className="text-[10px] uppercase tracking-[0.28em] text-cyan-300/70">
-                Period
+                {t("dashboard.period")}
               </span>
               <span className="ml-2 font-medium text-white">{periodLabel}</span>
             </div>
@@ -86,11 +92,11 @@ export default function BottomCountriesPanel({
 
           <div className="flex flex-wrap items-center gap-2.5">
             <SmallSelect
-              label="Country"
+              label={t("dashboard.country")}
               value={selectedCountry}
               onChange={onCountryChange}
             >
-              <option value="All">All Countries</option>
+              <option value="All">{t("dashboard.allCountries")}</option>
               <option value="China">China</option>
               <option value="India">India</option>
               <option value="Turkey">Turkey</option>
@@ -99,18 +105,18 @@ export default function BottomCountriesPanel({
             </SmallSelect>
 
             <SmallSelect
-              label="Trade Type"
+              label={t("dashboard.tradeType")}
               value={selectedTradeType}
               onChange={onTradeTypeChange}
             >
-              <option value="All">All</option>
-              <option value="Import">Import</option>
-              <option value="Export">Export</option>
-              <option value="Transit">Transit</option>
+              <option value="All">{t("dashboard.all")}</option>
+              <option value="Import">{t("nav.import")}</option>
+              <option value="Export">{t("nav.export")}</option>
+              <option value="Transit">{t("nav.transit")}</option>
             </SmallSelect>
 
             <SmallSelect
-              label="Period"
+              label={t("dashboard.period")}
               value={selectedPeriod}
               onChange={onPeriodChange}
             >

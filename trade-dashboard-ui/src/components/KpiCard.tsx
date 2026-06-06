@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 interface KpiCardProps {
   title: string;
   value: string | number;
@@ -11,6 +13,7 @@ export default function KpiCard({
   changePercentage,
   icon,
 }: KpiCardProps) {
+  const { t } = useTranslation();
   const isPositive = (changePercentage ?? 0) >= 0;
 
   return (
@@ -44,7 +47,8 @@ export default function KpiCard({
                 : "border-red-400/12 bg-red-500/8 text-red-200"
             }`}
           >
-            {isPositive ? "▲" : "▼"} {Math.abs(changePercentage)}% vs last year
+            {isPositive ? "▲" : "▼"} {Math.abs(changePercentage)}%{" "}
+            {t("common.versusLastYear")}
           </div>
         )}
       </div>
