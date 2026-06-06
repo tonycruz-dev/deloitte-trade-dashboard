@@ -1,1 +1,6 @@
-<Solution />
+<Solution>
+  <Project Path="Deloitte.TradeDashboard.Api/Deloitte.TradeDashboard.Api.csproj" />
+  <Project Path="Deloitte.TradeDashboard.Application/Deloitte.TradeDashboard.Application.csproj" />
+  <Project Path="Deloitte.TradeDashboard.Domain/Deloitte.TradeDashboard.Domain.csproj" />
+  <Project Path="Deloitte.TradeDashboard.Infrastructure/Deloitte.TradeDashboard.Infrastructure.csproj" />
+</Solution>

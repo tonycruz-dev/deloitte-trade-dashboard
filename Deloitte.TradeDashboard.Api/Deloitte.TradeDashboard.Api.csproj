@@ -10,4 +10,9 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Deloitte.TradeDashboard.Application\Deloitte.TradeDashboard.Application.csproj" />
+    <ProjectReference Include="..\Deloitte.TradeDashboard.Infrastructure\Deloitte.TradeDashboard.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

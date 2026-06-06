@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Deloitte.TradeDashboard.Application.Contracts
+namespace Deloitte.TradeDashboard.Application.Contracts;
+
+public interface IDashboardDataProvider
 {
-	internal interface IDashboardDataProvider
-	{
-	}
 }

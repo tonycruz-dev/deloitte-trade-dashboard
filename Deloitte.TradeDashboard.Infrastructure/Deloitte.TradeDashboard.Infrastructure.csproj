@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Deloitte.TradeDashboard.Application\Deloitte.TradeDashboard.Application.csproj" />
+    <ProjectReference Include="..\Deloitte.TradeDashboard.Domain\Deloitte.TradeDashboard.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
