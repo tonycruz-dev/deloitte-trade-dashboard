@@ -42,7 +42,7 @@ const [period, setPeriod] = useState("2024-03");
     return () => {
       isMounted = false;
     };
-  }, [selectedCountry]);
+  }, [tradeType, period, selectedCountry]);
 
   if (loading) {
     return (
