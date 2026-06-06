@@ -1,8 +1,6 @@
 ﻿using Deloitte.TradeDashboard.Application.Contracts;
 using Deloitte.TradeDashboard.Application.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 
 namespace Deloitte.TradeDashboard.Infrastructure.Providers;
 
@@ -12,6 +10,25 @@ public class JsonDashboardDataProvider : IDashboardDataProvider
 		DashboardQuery query,
 		CancellationToken cancellationToken)
 	{
-		throw new NotImplementedException();
+		var response = new DashboardResponse
+		{
+			TotalDeclarations = 245038,
+			TotalGoodsValue = 645345647,
+			TopCountries =
+	   [
+		   new CountryMetricDto
+			{
+				Country = "China",
+				Value = 92300
+			},
+			new CountryMetricDto
+			{
+				Country = "India",
+				Value = 61750
+			}
+	   ]
+		};
+
+		return Task.FromResult(response);
 	}
 }
