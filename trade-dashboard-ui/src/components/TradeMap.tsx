@@ -46,16 +46,18 @@ const tradePoints: TradePoint[] = [
     value: 28368,
   },
   {
-    country: "England",
-    latitude: 52.3555,
-    longitude: -1.1743,
+    country: "Saudi Arabia",
+    latitude: 23.8859,
+    longitude: 45.0792,
     value: 18500,
   },
 ];
 
 const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
-const routeOrigin = tradePoints.find((point) => point.country === "England");
-const routeDestinations = tradePoints.filter((point) => point.country !== "England");
+const routeOrigin = tradePoints.find((point) => point.country === "Saudi Arabia");
+const routeDestinations = tradePoints.filter(
+  (point) => point.country !== "Saudi Arabia",
+);
 
 function buildArcCoordinates(
   start: [number, number],
@@ -129,8 +131,8 @@ export default function TradeMap() {
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/dark-v11",
-      center: [18, 26],
-      zoom: 1.4,
+      center: [42, 27],
+      zoom: 2.3,
       interactive: true,
       attributionControl: false,
       dragPan: false,
@@ -190,10 +192,10 @@ export default function TradeMap() {
       };
 
       map.setFog({
-        color: "rgba(2, 6, 23, 0.98)",
-        "high-color": "rgba(4, 18, 35, 0.9)",
-        "space-color": "rgba(2, 6, 23, 1)",
-        "horizon-blend": 0.04,
+        color: "rgba(11, 31, 52, 0.62)",
+        "high-color": "rgba(15, 58, 88, 0.44)",
+        "space-color": "rgba(3, 14, 28, 0.62)",
+        "horizon-blend": 0.1,
       });
 
       map.addSource("trade-routes", {
@@ -287,7 +289,7 @@ export default function TradeMap() {
         source: "trade-points",
         paint: {
           "circle-color": "#22d3ee",
-          "circle-opacity": 0.42,
+          "circle-opacity": 0.46,
           "circle-stroke-color": "#9ae6f5",
           "circle-stroke-width": 1.2,
           "circle-radius": [
@@ -413,8 +415,8 @@ export default function TradeMap() {
         className="pointer-events-none absolute left-0 top-0 z-10 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-300/30 bg-cyan-400/8 shadow-[0_0_34px_rgba(45,212,191,0.2)] before:absolute before:inset-0 before:rounded-full before:border before:border-cyan-200/35 before:animate-ping before:content-['']"
       />
       <div ref={mapContainerRef} className="trade-map-canvas h-full w-full" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,_rgba(15,118,110,0.16),_transparent_26%),radial-gradient(circle_at_82%_12%,_rgba(34,211,238,0.1),_transparent_20%),linear-gradient(180deg,_rgba(2,6,23,0.35)_0%,_rgba(2,6,23,0.38)_24%,_rgba(2,6,23,0.68)_100%)]" />
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-[28%] bg-gradient-to-r from-slate-950/60 via-slate-950/15 to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,_rgba(15,118,110,0.1),_transparent_24%),radial-gradient(circle_at_82%_12%,_rgba(34,211,238,0.08),_transparent_18%),linear-gradient(180deg,_rgba(2,6,23,0.06)_0%,_rgba(2,6,23,0.1)_22%,_rgba(2,6,23,0.24)_100%)]" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-[28%] bg-gradient-to-r from-slate-950/18 via-slate-950/4 to-transparent" />
     </div>
   );
 }
