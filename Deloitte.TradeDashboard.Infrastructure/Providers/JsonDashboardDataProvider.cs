@@ -19,21 +19,27 @@ public class JsonDashboardDataProvider : IDashboardDataProvider
 		new() { Country = "England", Value = 18500 }
 	};
 
-		if (!string.IsNullOrWhiteSpace(query.Country) &&
-			!query.Country.Equals("All", StringComparison.OrdinalIgnoreCase))
+		if (!string.IsNullOrWhiteSpace(query.Country) && !query.Country.Equals("All", StringComparison.OrdinalIgnoreCase))
 		{
 			countries = countries
 				.Where(x => x.Country.Equals(query.Country, StringComparison.OrdinalIgnoreCase))
 				.ToList();
+
+			var selectedValue = countries.Sum(x => x.Value);
+
+			return Task.FromResult(new DashboardResponse
+			{
+				TotalDeclarations = (int)selectedValue,
+				TotalGoodsValue = selectedValue,
+				TopCountries = countries
+			});
 		}
 
-		var response = new DashboardResponse
+		return Task.FromResult(new DashboardResponse
 		{
-			TotalDeclarations = countries.Count == 1 ? (int)countries[0].Value : 245038,
-			TotalGoodsValue = countries.Sum(x => x.Value),
+			TotalDeclarations = 245038,
+			TotalGoodsValue = 645345647,
 			TopCountries = countries
-		};
-
-		return Task.FromResult(response);
+		});
 	}
 }
