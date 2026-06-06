@@ -10,6 +10,16 @@ type TradePoint = {
   value: number;
 };
 
+type TradeFeatureProperties = {
+  country: string;
+  value: number;
+};
+
+type TradeRouteProperties = {
+  origin: string;
+  destination: string;
+};
+
 const tradePoints: TradePoint[] = [
   {
     country: "China",
@@ -44,9 +54,6 @@ const tradePoints: TradePoint[] = [
 ];
 
 const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
-type TradeFeatureProperties = { country: string; value: number };
-type TradeRouteProperties = { origin: string; destination: string };
-
 const routeOrigin = tradePoints.find((point) => point.country === "England");
 const routeDestinations = tradePoints.filter((point) => point.country !== "England");
 
@@ -94,7 +101,8 @@ function buildPopupContent(country: string, value: number) {
   title.textContent = country;
 
   const label = document.createElement("p");
-  label.className = "px-4 pt-3 text-[11px] uppercase tracking-[0.24em] text-cyan-300";
+  label.className =
+    "px-4 pt-3 text-[11px] uppercase tracking-[0.24em] text-cyan-300";
   label.textContent = "Declaration Volume";
 
   const valueText = document.createElement("p");
@@ -121,14 +129,20 @@ export default function TradeMap() {
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/dark-v11",
-      center: [15, 28],
-      zoom: 1.25,
+      center: [18, 26],
+      zoom: 1.4,
+      interactive: true,
       attributionControl: false,
+      dragPan: false,
+      scrollZoom: false,
+      boxZoom: false,
+      doubleClickZoom: false,
+      touchZoomRotate: false,
+      keyboard: false,
       projection: "mercator",
     });
 
     mapRef.current = map;
-    map.addControl(new mapboxgl.NavigationControl(), "top-right");
 
     map.on("load", () => {
       const tradePointCollection: FeatureCollection<Point, TradeFeatureProperties> =
@@ -174,6 +188,13 @@ export default function TradeMap() {
                 }),
               ),
       };
+
+      map.setFog({
+        color: "rgba(2, 6, 23, 0.98)",
+        "high-color": "rgba(4, 18, 35, 0.9)",
+        "space-color": "rgba(2, 6, 23, 1)",
+        "horizon-blend": 0.04,
+      });
 
       map.addSource("trade-routes", {
         type: "geojson",
@@ -235,14 +256,40 @@ export default function TradeMap() {
       });
 
       map.addLayer({
+        id: "trade-bubbles-glow",
+        type: "circle",
+        source: "trade-points",
+        paint: {
+          "circle-color": "#2dd4bf",
+          "circle-opacity": 0.14,
+          "circle-blur": 0.45,
+          "circle-radius": [
+            "interpolate",
+            ["linear"],
+            ["get", "value"],
+            18500,
+            16,
+            28368,
+            20,
+            44120,
+            26,
+            61750,
+            34,
+            92300,
+            46,
+          ],
+        },
+      });
+
+      map.addLayer({
         id: "trade-bubbles",
         type: "circle",
         source: "trade-points",
         paint: {
           "circle-color": "#22d3ee",
-          "circle-opacity": 0.45,
-          "circle-stroke-color": "#67e8f9",
-          "circle-stroke-width": 1.5,
+          "circle-opacity": 0.42,
+          "circle-stroke-color": "#9ae6f5",
+          "circle-stroke-width": 1.2,
           "circle-radius": [
             "interpolate",
             ["linear"],
@@ -267,6 +314,7 @@ export default function TradeMap() {
         offset: 18,
         className: "trade-map-popup",
       });
+
       let animationFrameId = 0;
       let dashOffset = 0;
 
@@ -296,8 +344,6 @@ export default function TradeMap() {
       animateRoutes();
       updateOriginHaloPosition();
 
-      map.on("move", updateOriginHaloPosition);
-      map.on("zoom", updateOriginHaloPosition);
       map.on("resize", updateOriginHaloPosition);
 
       map.on("mouseenter", "trade-bubbles", (event) => {
@@ -312,12 +358,12 @@ export default function TradeMap() {
         }
 
         const [longitude, latitude] = feature.geometry.coordinates;
-        const country = feature.properties.country;
-        const value = feature.properties.value;
 
         popup
           .setLngLat([longitude, latitude])
-          .setDOMContent(buildPopupContent(country, value))
+          .setDOMContent(
+            buildPopupContent(feature.properties.country, feature.properties.value),
+          )
           .addTo(map);
       });
 
@@ -341,45 +387,34 @@ export default function TradeMap() {
     };
   }, []);
 
-  return (
-    <section className="mb-8 overflow-hidden rounded-3xl border border-slate-800 bg-slate-950/80 shadow-[0_24px_80px_rgba(2,12,27,0.45)]">
-      <div className="flex flex-col gap-3 border-b border-slate-800 px-5 py-5 md:flex-row md:items-end md:justify-between md:px-6">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-[0.28em] text-cyan-300/80">
-            Global Trade Flow
-          </p>
-          <h3 className="mt-2 text-2xl font-semibold text-white">
-            Declaration Hotspots
-          </h3>
-          <p className="mt-1 text-sm text-slate-400">
-            Bubble size scales with customs declaration volume across key
-            markets.
-          </p>
-        </div>
-      </div>
-
-      {!mapboxToken ? (
-        <div className="flex h-[500px] w-full items-center justify-center bg-slate-950 px-6 text-center">
-          <div>
-            <p className="text-sm font-medium uppercase tracking-[0.24em] text-amber-300">
+  if (!mapboxToken) {
+    return (
+      <div className="relative h-full w-full overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.08),_transparent_24%),linear-gradient(180deg,_rgba(2,6,23,0.96),_rgba(2,6,23,1))]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_30%,_rgba(45,212,191,0.12),_transparent_0),radial-gradient(circle_at_75%_40%,_rgba(34,211,238,0.1),_transparent_22%)]" />
+        <div className="relative flex h-full items-center justify-center px-6 text-center">
+          <div className="glass-panel max-w-md px-8 py-8">
+            <p className="text-xs uppercase tracking-[0.28em] text-amber-300/80">
               Mapbox Token Required
             </p>
-            <p className="mt-3 text-sm text-slate-400">
+            <p className="mt-3 text-sm text-slate-300">
               Set <code>VITE_MAPBOX_TOKEN</code> in your Vite environment to
-              render the trade map.
+              render the trade map background.
             </p>
           </div>
         </div>
-      ) : (
-        <div className="relative h-[500px] w-full">
-          <div
-            ref={originHaloRef}
-            className="pointer-events-none absolute left-0 top-0 z-10 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-300/35 bg-cyan-400/10 shadow-[0_0_30px_rgba(34,211,238,0.18)] before:absolute before:inset-0 before:rounded-full before:border before:border-cyan-200/40 before:animate-ping before:content-['']"
-          />
-          <div ref={mapContainerRef} className="h-full w-full" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-slate-950 via-slate-950/35 to-transparent" />
-        </div>
-      )}
-    </section>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-full w-full overflow-hidden">
+      <div
+        ref={originHaloRef}
+        className="pointer-events-none absolute left-0 top-0 z-10 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-300/30 bg-cyan-400/8 shadow-[0_0_34px_rgba(45,212,191,0.2)] before:absolute before:inset-0 before:rounded-full before:border before:border-cyan-200/35 before:animate-ping before:content-['']"
+      />
+      <div ref={mapContainerRef} className="trade-map-canvas h-full w-full" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,_rgba(15,118,110,0.16),_transparent_26%),radial-gradient(circle_at_82%_12%,_rgba(34,211,238,0.1),_transparent_20%),linear-gradient(180deg,_rgba(2,6,23,0.35)_0%,_rgba(2,6,23,0.38)_24%,_rgba(2,6,23,0.68)_100%)]" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-[28%] bg-gradient-to-r from-slate-950/60 via-slate-950/15 to-transparent" />
+    </div>
   );
 }
