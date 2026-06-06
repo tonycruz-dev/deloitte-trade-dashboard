@@ -1,1 +1,29 @@
 @import "tailwindcss";
+
+.trade-map-popup .mapboxgl-popup-content {
+  padding: 0;
+  border: 1px solid rgb(30 41 59 / 0.9);
+  border-radius: 1rem;
+  background: transparent;
+  box-shadow: 0 24px 60px rgb(2 12 27 / 0.45);
+}
+
+.trade-map-popup .mapboxgl-popup-tip {
+  border-top-color: rgb(2 6 23 / 0.95);
+}
+
+.mapboxgl-ctrl-group {
+  overflow: hidden;
+  border: 1px solid rgb(51 65 85 / 0.8);
+  border-radius: 0.9rem;
+  background: rgb(15 23 42 / 0.88);
+  box-shadow: 0 16px 36px rgb(2 12 27 / 0.32);
+}
+
+.mapboxgl-ctrl-group button {
+  background: transparent;
+}
+
+.mapboxgl-ctrl-group button span {
+  filter: invert(1);
+}

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getDashboard } from "../api/dashboardApi";
 import type { DashboardResponse } from "../types/dashboard";
 import KpiCard from "../components/KpiCard";
+import TradeMap from "../components/TradeMap";
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardResponse | null>(null);
@@ -146,7 +147,7 @@ const [period, setPeriod] = useState("2024-03");
             changePercentage={15}
           />
         </section>
-
+        <TradeMap />
         <section className="mt-8 rounded-2xl border border-slate-700 bg-slate-900/80 p-6">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-xl font-semibold">Top Countries</h3>
