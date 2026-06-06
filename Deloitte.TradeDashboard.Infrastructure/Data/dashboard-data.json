@@ -1,0 +1,18 @@
+{
+	"totalDeclarations": 245038,
+	"totalGoodsValue": 645345647,
+	"topCountries": [
+		{
+			"country": "China",
+			"value": 92300
+		},
+		{
+			"country": "India",
+			"value": 61750
+		},
+		{
+			"country": "Turkey",
+			"value": 44120
+		}
+	]
+}

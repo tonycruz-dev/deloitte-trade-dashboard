@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Deloitte.TradeDashboard.Application.Models
+namespace Deloitte.TradeDashboard.Application.Models;
+
+public class CountryMetricDto
 {
-	internal class CountryMetricDto
-	{
-	}
 }
