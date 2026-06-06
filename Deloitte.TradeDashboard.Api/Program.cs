@@ -16,6 +16,16 @@ builder.Services.AddSwaggerGen(options =>
 
 
 });
+builder.Services.AddCors(options =>
+{
+	options.AddPolicy("ReactApp", policy =>
+	{
+		policy
+			.WithOrigins("https://localhost:3000")
+			.AllowAnyHeader()
+			.AllowAnyMethod();
+	});
+});
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddScoped<IDashboardDataProvider, JsonDashboardDataProvider>();
 
@@ -30,12 +40,13 @@ if (app.Environment.IsDevelopment())
 		options.SwaggerEndpoint("/swagger/v1/swagger.json", "TradeDashboard API v1");
 	});
 }
-
+app.UseCors("ReactApp");
 
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
 
 app.Run();
