@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import type { Feature, FeatureCollection, LineString, Point } from "geojson";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { useTranslation } from "react-i18next";
+import { getCountryTranslationKey } from "../i18n/countries";
 import type { MapPointDto } from "../types/dashboard";
 
 type TradeFeatureProperties = {
@@ -25,6 +27,58 @@ const tradeRouteGlowLayerId = "trade-routes-glow";
 const tradeRouteLayerId = "trade-routes";
 const tradeBubbleGlowLayerId = "trade-bubbles-glow";
 const tradeBubbleLayerId = "trade-bubbles";
+const saudiFallbackOrigin: MapPointDto = {
+  country: "Saudi Arabia",
+  latitude: 23.8859,
+  longitude: 45.0792,
+  value: 18500,
+};
+
+function applyExecutiveMapEnhancements(map: mapboxgl.Map) {
+  const style = map.getStyle();
+
+  if (!style.layers) {
+    return;
+  }
+
+  for (const layer of style.layers) {
+    if (layer.type === "background") {
+      map.setPaintProperty(layer.id, "background-color", "#071523");
+      continue;
+    }
+
+    if (layer.type === "fill" && layer.id.includes("land")) {
+      map.setPaintProperty(layer.id, "fill-color", "#17324a");
+      map.setPaintProperty(layer.id, "fill-opacity", 0.94);
+      continue;
+    }
+
+    if (layer.type === "line" && layer.id.includes("border")) {
+      map.setPaintProperty(layer.id, "line-color", "#6b8aa3");
+      map.setPaintProperty(layer.id, "line-opacity", 0.52);
+      continue;
+    }
+
+    if (
+      layer.type === "symbol" &&
+      layer.id.includes("country-label")
+    ) {
+      map.setPaintProperty(layer.id, "text-color", "#dbeafe");
+      map.setPaintProperty(layer.id, "text-halo-color", "#0b1625");
+      map.setPaintProperty(layer.id, "text-halo-width", 1.1);
+      continue;
+    }
+
+    if (
+      layer.type === "symbol" &&
+      (layer.id.includes("settlement") || layer.id.includes("place"))
+    ) {
+      map.setPaintProperty(layer.id, "text-color", "#bcd2e8");
+      map.setPaintProperty(layer.id, "text-halo-color", "#08111d");
+      map.setPaintProperty(layer.id, "text-halo-width", 0.9);
+    }
+  }
+}
 
 function buildArcCoordinates(
   start: [number, number],
@@ -61,7 +115,7 @@ function buildArcCoordinates(
   });
 }
 
-function buildPopupContent(country: string, value: number) {
+function buildPopupContent(country: string, value: number, metricLabel: string) {
   const container = document.createElement("div");
   container.className = "min-w-[180px] rounded-xl bg-slate-950/95 p-0 text-white";
 
@@ -72,7 +126,7 @@ function buildPopupContent(country: string, value: number) {
   const label = document.createElement("p");
   label.className =
     "px-4 pt-3 text-[11px] uppercase tracking-[0.24em] text-cyan-300";
-  label.textContent = "Declaration Volume";
+  label.textContent = metricLabel;
 
   const valueText = document.createElement("p");
   valueText.className = "px-4 pb-4 pt-1 text-lg font-semibold text-white";
@@ -83,46 +137,60 @@ function buildPopupContent(country: string, value: number) {
   return container;
 }
 
+function isValidMapPoint(point: MapPointDto) {
+  return (
+    Boolean(point.country) &&
+    Number.isFinite(point.latitude) &&
+    Number.isFinite(point.longitude) &&
+    Number.isFinite(point.value) &&
+    point.value > 0 &&
+    Math.abs(point.latitude) <= 90 &&
+    Math.abs(point.longitude) <= 180
+  );
+}
+
 export default function TradeMap({ mapPoints }: TradeMapProps) {
+  const { t } = useTranslation();
   const safeMapPoints = Array.isArray(mapPoints) ? mapPoints : [];
-  const validMapPoints = safeMapPoints.filter((point) => {
-    const isValidCoordinate =
-      Number.isFinite(point.latitude) &&
-      Number.isFinite(point.longitude) &&
-      Math.abs(point.latitude) <= 90 &&
-      Math.abs(point.longitude) <= 180;
+  const validMapPoints = safeMapPoints.filter(isValidMapPoint);
 
-    return (
-      Boolean(point.country) &&
-      Number.isFinite(point.value) &&
-      point.value > 0 &&
-      isValidCoordinate
-    );
-  });
-
+  console.log("TradeMap mapPoints:", mapPoints);
   console.log("Map points from API:", safeMapPoints);
+
+  if (
+    import.meta.env.DEV &&
+    safeMapPoints.length > 0 &&
+    validMapPoints.length !== safeMapPoints.length
+  ) {
+    console.warn("Ignoring invalid trade map points.", {
+      received: safeMapPoints.length,
+      valid: validMapPoints.length,
+    });
+  }
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const originHaloRef = useRef<HTMLDivElement | null>(null);
   const popupRef = useRef<mapboxgl.Popup | null>(null);
   const originPointRef = useRef<MapPointDto | undefined>(undefined);
-  const mapPointsRef = useRef(validMapPoints);
+  const mapPointsRef = useRef<MapPointDto[]>(validMapPoints);
   const syncTradeDataRef = useRef<(() => void) | null>(null);
-  mapPointsRef.current = validMapPoints;
+
+ // eslint-disable-next-line react-hooks/refs
+ mapPointsRef.current = validMapPoints;
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current || !mapboxToken) {
       return;
     }
-
+    
     mapboxgl.accessToken = mapboxToken;
 
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/dark-v11",
-      center: [42, 27],
-      zoom: 2.3,
+      center: [35, 25],
+      zoom: 3.15,
       interactive: true,
       attributionControl: false,
       dragPan: false,
@@ -137,11 +205,13 @@ export default function TradeMap({ mapPoints }: TradeMapProps) {
     mapRef.current = map;
 
     map.on("load", () => {
+      applyExecutiveMapEnhancements(map);
+
       map.setFog({
-        color: "rgba(11, 31, 52, 0.62)",
-        "high-color": "rgba(15, 58, 88, 0.44)",
-        "space-color": "rgba(3, 14, 28, 0.62)",
-        "horizon-blend": 0.1,
+        color: "rgba(18, 43, 68, 0.42)",
+        "high-color": "rgba(27, 79, 112, 0.32)",
+        "space-color": "rgba(6, 20, 36, 0.34)",
+        "horizon-blend": 0.14,
       });
 
       map.addSource(tradeRouteSourceId, {
@@ -171,15 +241,7 @@ export default function TradeMap({ mapPoints }: TradeMapProps) {
         paint: {
           "line-color": "#2dd4bf",
           "line-opacity": 0.16,
-          "line-width": [
-            "interpolate",
-            ["linear"],
-            ["zoom"],
-            1,
-            5,
-            3,
-            9,
-          ],
+          "line-width": ["interpolate", ["linear"], ["zoom"], 1, 5, 3, 9],
           "line-blur": 3.2,
         },
       });
@@ -195,15 +257,7 @@ export default function TradeMap({ mapPoints }: TradeMapProps) {
         paint: {
           "line-color": "#22d3ee",
           "line-opacity": 0.34,
-          "line-width": [
-            "interpolate",
-            ["linear"],
-            ["zoom"],
-            1,
-            1.25,
-            3,
-            2.35,
-          ],
+          "line-width": ["interpolate", ["linear"], ["zoom"], 1, 1.25, 3, 2.35],
           "line-blur": 0.35,
           "line-dasharray": [0, 4, 3],
         },
@@ -221,16 +275,11 @@ export default function TradeMap({ mapPoints }: TradeMapProps) {
             "interpolate",
             ["linear"],
             ["get", "value"],
-            18500,
-            16,
-            28368,
-            20,
-            44120,
-            26,
-            61750,
-            34,
-            92300,
-            46,
+            18500, 16,
+            28368, 20,
+            44120, 26,
+            61750, 34,
+            92300, 46,
           ],
         },
       });
@@ -248,28 +297,21 @@ export default function TradeMap({ mapPoints }: TradeMapProps) {
             "interpolate",
             ["linear"],
             ["get", "value"],
-            18500,
-            10,
-            28368,
-            14,
-            44120,
-            18,
-            61750,
-            24,
-            92300,
-            32,
+            18500, 10,
+            28368, 14,
+            44120, 18,
+            61750, 24,
+            92300, 32,
           ],
         },
       });
 
-      const popup = new mapboxgl.Popup({
+      popupRef.current = new mapboxgl.Popup({
         closeButton: false,
         closeOnClick: false,
         offset: 18,
         className: "trade-map-popup",
       });
-
-      popupRef.current = popup;
 
       let animationFrameId = 0;
       let dashOffset = 0;
@@ -295,19 +337,22 @@ export default function TradeMap({ mapPoints }: TradeMapProps) {
 
       const syncTradeData = () => {
         const currentMapPoints = mapPointsRef.current;
-        const routeOrigin = currentMapPoints.find(
+        const saudiPoint = currentMapPoints.find(
           (point) => point.country === "Saudi Arabia",
         );
-        const routeDestinations = currentMapPoints.filter(
-          (point) => point.country !== "Saudi Arabia",
-        );
+        const routeOrigin = saudiPoint ?? saudiFallbackOrigin;
+        const routeDestinations = currentMapPoints.filter((point) => {
+          const isOriginCountry = point.country === routeOrigin.country;
+          const sameCoordinates =
+            point.longitude === routeOrigin.longitude &&
+            point.latitude === routeOrigin.latitude;
+
+          return !isOriginCountry && !sameCoordinates;
+        });
 
         originPointRef.current = routeOrigin;
 
-        const tradePointCollection: FeatureCollection<
-          Point,
-          TradeFeatureProperties
-        > = {
+        const tradePointCollection: FeatureCollection<Point, TradeFeatureProperties> = {
           type: "FeatureCollection",
           features: currentMapPoints.map(
             (point): Feature<Point, TradeFeatureProperties> => ({
@@ -324,31 +369,29 @@ export default function TradeMap({ mapPoints }: TradeMapProps) {
           ),
         };
 
-        const tradeRouteCollection: FeatureCollection<
-          LineString,
-          TradeRouteProperties
-        > = {
+        const tradeRouteCollection: FeatureCollection<LineString, TradeRouteProperties> = {
           type: "FeatureCollection",
-          features:
-            routeOrigin === undefined
-              ? []
-              : routeDestinations.map(
-                  (point): Feature<LineString, TradeRouteProperties> => ({
-                    type: "Feature",
-                    properties: {
-                      origin: routeOrigin.country,
-                      destination: point.country,
-                    },
-                    geometry: {
-                      type: "LineString",
-                      coordinates: buildArcCoordinates(
-                        [routeOrigin.longitude, routeOrigin.latitude],
-                        [point.longitude, point.latitude],
-                      ),
-                    },
-                  }),
+          features: routeDestinations.map(
+            (point): Feature<LineString, TradeRouteProperties> => ({
+              type: "Feature",
+              properties: {
+                origin: routeOrigin.country,
+                destination: point.country,
+              },
+              geometry: {
+                type: "LineString",
+                coordinates: buildArcCoordinates(
+                  [routeOrigin.longitude, routeOrigin.latitude],
+                  [point.longitude, point.latitude],
                 ),
+              },
+            }),
+          ),
         };
+
+        if (import.meta.env.DEV) {
+          console.log("TradeMap route source features:", tradeRouteCollection.features);
+        }
 
         const tradePointSource = map.getSource(tradePointSourceId) as
           | mapboxgl.GeoJSONSource
@@ -357,18 +400,28 @@ export default function TradeMap({ mapPoints }: TradeMapProps) {
           | mapboxgl.GeoJSONSource
           | undefined;
 
-        tradePointSource?.setData(tradePointCollection);
-        tradeRouteSource?.setData(tradeRouteCollection);
+        if (!tradePointSource || !tradeRouteSource) {
+          if (import.meta.env.DEV) {
+            console.warn("TradeMap sources are not ready for live update.");
+          }
+          return;
+        }
+
+        tradePointSource.setData(tradePointCollection);
+        tradeRouteSource.setData(tradeRouteCollection);
         updateOriginHaloPosition();
       };
 
       const animateRoutes = () => {
-        dashOffset = (dashOffset + 0.045) % 6;
-        map.setPaintProperty(tradeRouteLayerId, "line-dasharray", [
-          dashOffset,
-          4,
-          3,
-        ]);
+        if (map.getLayer(tradeRouteLayerId)) {
+          dashOffset = (dashOffset + 0.045) % 6;
+          map.setPaintProperty(tradeRouteLayerId, "line-dasharray", [
+            dashOffset,
+            4,
+            3,
+          ]);
+        }
+
         animationFrameId = window.requestAnimationFrame(animateRoutes);
       };
 
@@ -396,7 +449,11 @@ export default function TradeMap({ mapPoints }: TradeMapProps) {
         popupRef.current
           .setLngLat([longitude, latitude])
           .setDOMContent(
-            buildPopupContent(feature.properties.country, feature.properties.value),
+            buildPopupContent(
+              t(getCountryTranslationKey(feature.properties.country)),
+              feature.properties.value,
+              t("dashboard.totalCustomsDeclarations"),
+            ),
           )
           .addTo(map);
       });
@@ -466,8 +523,8 @@ export default function TradeMap({ mapPoints }: TradeMapProps) {
           </div>
         </div>
       ) : null}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,_rgba(15,118,110,0.1),_transparent_24%),radial-gradient(circle_at_82%_12%,_rgba(34,211,238,0.08),_transparent_18%),linear-gradient(180deg,_rgba(2,6,23,0.06)_0%,_rgba(2,6,23,0.1)_22%,_rgba(2,6,23,0.24)_100%)]" />
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-[28%] bg-gradient-to-r from-slate-950/18 via-slate-950/4 to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,_rgba(21,94,117,0.11),_transparent_26%),radial-gradient(circle_at_82%_12%,_rgba(34,211,238,0.1),_transparent_20%),linear-gradient(180deg,_rgba(2,6,23,0.02)_0%,_rgba(2,6,23,0.06)_24%,_rgba(2,6,23,0.14)_100%)]" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-[28%] bg-gradient-to-r from-slate-950/10 via-slate-950/3 to-transparent" />
     </div>
   );
 }

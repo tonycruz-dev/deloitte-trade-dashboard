@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { getCountryTranslationKey } from "../i18n/countries";
 import FilterDropdown, {
   type FilterDropdownOption,
 } from "./FilterDropdown";
@@ -102,7 +103,9 @@ export default function BottomCountriesPanel({
                 <span className="country-rank">
                   {(index + 1).toString().padStart(2, "0")}
                 </span>
-                <span className="country-name">{country.country}</span>
+                <span className="country-name">
+                  {t(getCountryTranslationKey(country.country))}
+                </span>
               </div>
               <span className="country-value">
                 {country.value.toLocaleString()}

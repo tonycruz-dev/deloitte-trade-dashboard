@@ -41,6 +41,20 @@ export const resources = {
         loadingDescription:
           "Retrieving trade declarations, goods value, and market movement.",
       },
+      countries: {
+        china: "China",
+        india: "India",
+        turkey: "Turkey",
+        germany: "Germany",
+        saudiArabia: "Saudi Arabia",
+        unitedStates: "United States",
+        brazil: "Brazil",
+        southAfrica: "South Africa",
+        japan: "Japan",
+        australia: "Australia",
+        france: "France",
+        unitedArabEmirates: "United Arab Emirates",
+      },
       common: {
         search: "Search",
         help: "Help",
@@ -94,6 +108,20 @@ export const resources = {
         loadingDescription:
           "Récupération des déclarations douanières, de la valeur des marchandises et des mouvements du marché.",
       },
+      countries: {
+        china: "Chine",
+        india: "Inde",
+        turkey: "Turquie",
+        germany: "Allemagne",
+        saudiArabia: "Arabie saoudite",
+        unitedStates: "États-Unis",
+        brazil: "Brésil",
+        southAfrica: "Afrique du Sud",
+        japan: "Japon",
+        australia: "Australie",
+        france: "France",
+        unitedArabEmirates: "Émirats arabes unis",
+      },
       common: {
         search: "Recherche",
         help: "Aide",
@@ -142,6 +170,20 @@ export const resources = {
         loadingDashboardIntelligence: "جار تحميل معلومات لوحة المعلومات",
         loadingDescription:
           "يتم الآن استرجاع البيانات الجمركية وقيمة البضائع وحركة الأسواق.",
+      },
+      countries: {
+        china: "الصين",
+        india: "الهند",
+        turkey: "تركيا",
+        germany: "ألمانيا",
+        saudiArabia: "المملكة العربية السعودية",
+        unitedStates: "الولايات المتحدة",
+        brazil: "البرازيل",
+        southAfrica: "جنوب أفريقيا",
+        japan: "اليابان",
+        australia: "أستراليا",
+        france: "فرنسا",
+        unitedArabEmirates: "الإمارات العربية المتحدة",
       },
       common: {
         search: "بحث",
