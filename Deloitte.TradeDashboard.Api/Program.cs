@@ -49,9 +49,13 @@ app.UseCors("ReactApp");
 
 app.UseHttpsRedirection();
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<DashboardHub>("/hubs/dashboard");
+app.MapFallbackToFile("index.html");
 
 app.Run();

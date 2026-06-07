@@ -14,8 +14,9 @@ node_modules/
 
 # Environment files
 .env
-.env.*
 !.env.example
+.env.local
+.env.*.local
 
 # Logs
 logs/
@@ -37,3 +38,8 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# Generated frontend build output served by ASP.NET Core in deployment only
+Deloitte.TradeDashboard.Api/wwwroot/assets/
+Deloitte.TradeDashboard.Api/wwwroot/index.html
+Deloitte.TradeDashboard.Api/wwwroot/vite.svg

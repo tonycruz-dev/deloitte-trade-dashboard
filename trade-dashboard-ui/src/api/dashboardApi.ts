@@ -1,10 +1,9 @@
 import axios from "axios";
+import { appConfig } from "../config/appConfig";
 import type { DashboardResponse } from "../types/dashboard";
 
-export const apiBaseUrl = "https://localhost:7001";
-
 const api = axios.create({
-  baseURL: `${apiBaseUrl}/api`,
+  baseURL: appConfig.apiBaseUrl ? `${appConfig.apiBaseUrl}/api` : "/api",
 });
 
 function buildDashboardParams(country?: string, tradeType?: string, period?: string) {

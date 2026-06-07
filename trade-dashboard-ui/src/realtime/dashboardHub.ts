@@ -4,7 +4,7 @@ import {
   HubConnectionState,
   LogLevel,
 } from "@microsoft/signalr";
-import { apiBaseUrl } from "../api/dashboardApi";
+import { appConfig } from "../config/appConfig";
 import type { DashboardResponse } from "../types/dashboard";
 
 export type DashboardConnectionStatus =
@@ -19,14 +19,13 @@ type DashboardHubOptions = {
 };
 
 const dashboardUpdatedEventName = "DashboardUpdated";
-const dashboardHubUrl = `${apiBaseUrl}/hubs/dashboard`;
 
 export async function connectDashboardHub({
   onDashboardUpdated,
   onStatusChange,
 }: DashboardHubOptions): Promise<HubConnection> {
   const connection = new HubConnectionBuilder()
-    .withUrl(dashboardHubUrl)
+    .withUrl(appConfig.signalRHubUrl)
     .withAutomaticReconnect()
     .configureLogging(LogLevel.Warning)
     .build();

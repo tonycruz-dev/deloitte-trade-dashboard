@@ -6,6 +6,11 @@ import mkcert from "vite-plugin-mkcert";
 
 // https://vite.dev/config/
 export default defineConfig({
+  build: {
+    outDir: "../Deloitte.TradeDashboard.Api/wwwroot",
+    chunkSizeWarningLimit: 2000,
+    emptyOutDir: true,
+  },
   plugins: [
     react(),
     tailwindcss(),

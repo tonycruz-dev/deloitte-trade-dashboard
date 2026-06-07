@@ -3,6 +3,7 @@ import type { Feature, FeatureCollection, LineString, Point } from "geojson";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useTranslation } from "react-i18next";
+import { appConfig } from "../config/appConfig";
 import { getCountryTranslationKey } from "../i18n/countries";
 import type { MapPointDto } from "../types/dashboard";
 
@@ -20,7 +21,7 @@ type TradeMapProps = {
   mapPoints?: MapPointDto[];
 };
 
-const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
+const mapboxToken = appConfig.mapboxToken;
 const tradeRouteSourceId = "trade-routes";
 const tradePointSourceId = "trade-points";
 const tradeRouteGlowLayerId = "trade-routes-glow";
@@ -190,11 +191,11 @@ export default function TradeMap({ mapPoints }: TradeMapProps) {
       container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/dark-v11",
       center: [35, 25],
-      zoom: 3.15,
+      zoom: 2.2,
       interactive: true,
       attributionControl: false,
       dragPan: false,
-      scrollZoom: false,
+      scrollZoom: true,
       boxZoom: false,
       doubleClickZoom: false,
       touchZoomRotate: false,
