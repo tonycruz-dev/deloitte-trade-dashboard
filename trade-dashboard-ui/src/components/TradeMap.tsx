@@ -2,13 +2,7 @@ import { useEffect, useRef } from "react";
 import type { Feature, FeatureCollection, LineString, Point } from "geojson";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-
-type TradePoint = {
-  country: string;
-  latitude: number;
-  longitude: number;
-  value: number;
-};
+import type { MapPointDto } from "../types/dashboard";
 
 type TradeFeatureProperties = {
   country: string;
@@ -20,44 +14,11 @@ type TradeRouteProperties = {
   destination: string;
 };
 
-const tradePoints: TradePoint[] = [
-  {
-    country: "China",
-    latitude: 35.8617,
-    longitude: 104.1954,
-    value: 92300,
-  },
-  {
-    country: "India",
-    latitude: 20.5937,
-    longitude: 78.9629,
-    value: 61750,
-  },
-  {
-    country: "Turkey",
-    latitude: 38.9637,
-    longitude: 35.2433,
-    value: 44120,
-  },
-  {
-    country: "Germany",
-    latitude: 51.1657,
-    longitude: 10.4515,
-    value: 28368,
-  },
-  {
-    country: "Saudi Arabia",
-    latitude: 23.8859,
-    longitude: 45.0792,
-    value: 18500,
-  },
-];
+type TradeMapProps = {
+  mapPoints: MapPointDto[];
+};
 
 const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
-const routeOrigin = tradePoints.find((point) => point.country === "Saudi Arabia");
-const routeDestinations = tradePoints.filter(
-  (point) => point.country !== "Saudi Arabia",
-);
 
 function buildArcCoordinates(
   start: [number, number],
@@ -116,16 +77,22 @@ function buildPopupContent(country: string, value: number) {
   return container;
 }
 
-export default function TradeMap() {
+export default function TradeMap({ mapPoints }: TradeMapProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const originHaloRef = useRef<HTMLDivElement | null>(null);
+  const popupRef = useRef<mapboxgl.Popup | null>(null);
+  const originPointRef = useRef<MapPointDto | null>(null);
+  const mapPointsRef = useRef(mapPoints);
+  const syncTradeDataRef = useRef<(() => void) | null>(null);
+
+ 
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current || !mapboxToken) {
       return;
     }
-
+    mapPointsRef.current = mapPoints;
     mapboxgl.accessToken = mapboxToken;
 
     const map = new mapboxgl.Map({
@@ -147,50 +114,6 @@ export default function TradeMap() {
     mapRef.current = map;
 
     map.on("load", () => {
-      const tradePointCollection: FeatureCollection<Point, TradeFeatureProperties> =
-        {
-          type: "FeatureCollection",
-          features: tradePoints.map(
-            (point): Feature<Point, TradeFeatureProperties> => ({
-              type: "Feature",
-              properties: {
-                country: point.country,
-                value: point.value,
-              },
-              geometry: {
-                type: "Point",
-                coordinates: [point.longitude, point.latitude],
-              },
-            }),
-          ),
-        };
-
-      const tradeRouteCollection: FeatureCollection<
-        LineString,
-        TradeRouteProperties
-      > = {
-        type: "FeatureCollection",
-        features:
-          routeOrigin === undefined
-            ? []
-            : routeDestinations.map(
-                (point): Feature<LineString, TradeRouteProperties> => ({
-                  type: "Feature",
-                  properties: {
-                    origin: routeOrigin.country,
-                    destination: point.country,
-                  },
-                  geometry: {
-                    type: "LineString",
-                    coordinates: buildArcCoordinates(
-                      [routeOrigin.longitude, routeOrigin.latitude],
-                      [point.longitude, point.latitude],
-                    ),
-                  },
-                }),
-              ),
-      };
-
       map.setFog({
         color: "rgba(11, 31, 52, 0.62)",
         "high-color": "rgba(15, 58, 88, 0.44)",
@@ -200,12 +123,18 @@ export default function TradeMap() {
 
       map.addSource("trade-routes", {
         type: "geojson",
-        data: tradeRouteCollection,
+        data: {
+          type: "FeatureCollection",
+          features: [],
+        } satisfies FeatureCollection<LineString, TradeRouteProperties>,
       });
 
       map.addSource("trade-points", {
         type: "geojson",
-        data: tradePointCollection,
+        data: {
+          type: "FeatureCollection",
+          features: [],
+        } satisfies FeatureCollection<Point, TradeFeatureProperties>,
       });
 
       map.addLayer({
@@ -317,11 +246,18 @@ export default function TradeMap() {
         className: "trade-map-popup",
       });
 
+      popupRef.current = popup;
+
       let animationFrameId = 0;
       let dashOffset = 0;
 
       const updateOriginHaloPosition = () => {
+        const routeOrigin = originPointRef.current;
+
         if (!originHaloRef.current || !routeOrigin) {
+          if (originHaloRef.current) {
+            originHaloRef.current.style.opacity = "0";
+          }
           return;
         }
 
@@ -330,7 +266,77 @@ export default function TradeMap() {
           routeOrigin.latitude,
         ]);
 
+        originHaloRef.current.style.opacity = "1";
         originHaloRef.current.style.transform = `translate(${projectedPoint.x}px, ${projectedPoint.y}px) translate(-50%, -50%)`;
+      };
+
+      const syncTradeData = () => {
+        const currentMapPoints = mapPointsRef.current;
+        const routeOrigin = currentMapPoints.find(
+          (point) => point.country === "Saudi Arabia",
+        );
+        const routeDestinations = currentMapPoints.filter(
+          (point) => point.country !== "Saudi Arabia",
+        );
+
+        originPointRef.current = routeOrigin ?? null;
+
+        const tradePointCollection: FeatureCollection<
+          Point,
+          TradeFeatureProperties
+        > = {
+          type: "FeatureCollection",
+          features: currentMapPoints.map(
+            (point): Feature<Point, TradeFeatureProperties> => ({
+              type: "Feature",
+              properties: {
+                country: point.country,
+                value: point.value,
+              },
+              geometry: {
+                type: "Point",
+                coordinates: [point.longitude, point.latitude],
+              },
+            }),
+          ),
+        };
+
+        const tradeRouteCollection: FeatureCollection<
+          LineString,
+          TradeRouteProperties
+        > = {
+          type: "FeatureCollection",
+          features:
+            routeOrigin === undefined
+              ? []
+              : routeDestinations.map(
+                  (point): Feature<LineString, TradeRouteProperties> => ({
+                    type: "Feature",
+                    properties: {
+                      origin: routeOrigin.country,
+                      destination: point.country,
+                    },
+                    geometry: {
+                      type: "LineString",
+                      coordinates: buildArcCoordinates(
+                        [routeOrigin.longitude, routeOrigin.latitude],
+                        [point.longitude, point.latitude],
+                      ),
+                    },
+                  }),
+                ),
+        };
+
+        const tradePointSource = map.getSource("trade-points") as
+          | mapboxgl.GeoJSONSource
+          | undefined;
+        const tradeRouteSource = map.getSource("trade-routes") as
+          | mapboxgl.GeoJSONSource
+          | undefined;
+
+        tradePointSource?.setData(tradePointCollection);
+        tradeRouteSource?.setData(tradeRouteCollection);
+        updateOriginHaloPosition();
       };
 
       const animateRoutes = () => {
@@ -343,10 +349,13 @@ export default function TradeMap() {
         animationFrameId = window.requestAnimationFrame(animateRoutes);
       };
 
+      syncTradeDataRef.current = syncTradeData;
+
       animateRoutes();
-      updateOriginHaloPosition();
+      syncTradeData();
 
       map.on("resize", updateOriginHaloPosition);
+      map.on("move", updateOriginHaloPosition);
 
       map.on("mouseenter", "trade-bubbles", (event) => {
         map.getCanvas().style.cursor = "pointer";
@@ -355,13 +364,13 @@ export default function TradeMap() {
           | Feature<Point, TradeFeatureProperties>
           | undefined;
 
-        if (!feature) {
+        if (!feature || !popupRef.current) {
           return;
         }
 
         const [longitude, latitude] = feature.geometry.coordinates;
 
-        popup
+        popupRef.current
           .setLngLat([longitude, latitude])
           .setDOMContent(
             buildPopupContent(feature.properties.country, feature.properties.value),
@@ -371,7 +380,7 @@ export default function TradeMap() {
 
       map.on("mouseleave", "trade-bubbles", () => {
         map.getCanvas().style.cursor = "";
-        popup.remove();
+        popupRef.current?.remove();
       });
 
       map.on("remove", () => {
@@ -383,11 +392,17 @@ export default function TradeMap() {
     window.addEventListener("resize", handleResize);
 
     return () => {
+      popupRef.current?.remove();
       window.removeEventListener("resize", handleResize);
+      syncTradeDataRef.current = null;
       map.remove();
       mapRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    syncTradeDataRef.current?.();
+  }, [mapPoints]);
 
   if (!mapboxToken) {
     return (

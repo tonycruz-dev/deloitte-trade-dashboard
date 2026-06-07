@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getDashboard } from "../api/dashboardApi";
 import BottomCountriesPanel from "../components/BottomCountriesPanel";
+import type { FilterDropdownOption } from "../components/FilterDropdown";
 import KpiCard from "../components/KpiCard";
 import TopNavigation from "../components/TopNavigation";
 import TradeMap from "../components/TradeMap";
@@ -104,7 +105,7 @@ export default function DashboardPage() {
     return (
       <div className={shellClasses}>
         <div className="absolute inset-0 opacity-70">
-          <TradeMap />
+          <TradeMap mapPoints={[]} />
         </div>
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(8,145,178,0.12),_transparent_30%),linear-gradient(180deg,_rgba(2,6,23,0.22)_0%,_rgba(2,6,23,0.32)_36%,_rgba(2,6,23,0.78)_100%)]" />
         <LoadingState />
@@ -116,7 +117,7 @@ export default function DashboardPage() {
     return (
       <div className={shellClasses}>
         <div className="absolute inset-0 opacity-60">
-          <TradeMap />
+          <TradeMap mapPoints={[]} />
         </div>
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,_rgba(2,6,23,0.22)_0%,_rgba(2,6,23,0.74)_100%)]" />
         <MessageState
@@ -132,7 +133,7 @@ export default function DashboardPage() {
     return (
       <div className={shellClasses}>
         <div className="absolute inset-0 opacity-60">
-          <TradeMap />
+          <TradeMap mapPoints={[]} />
         </div>
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,_rgba(2,6,23,0.22)_0%,_rgba(2,6,23,0.74)_100%)]" />
         <MessageState
@@ -145,11 +146,30 @@ export default function DashboardPage() {
   }
 
   const periodLabel = getPeriodLabel(period);
+  const countryOptions: FilterDropdownOption[] = [
+    { value: "All", label: t("dashboard.allCountries") },
+    { value: "China", label: "China" },
+    { value: "India", label: "India" },
+    { value: "Turkey", label: "Turkey" },
+    { value: "Germany", label: "Germany" },
+    { value: "England", label: "England" },
+  ];
+  const tradeTypeOptions: FilterDropdownOption[] = [
+    { value: "All", label: t("dashboard.all") },
+    { value: "Import", label: t("nav.import") },
+    { value: "Export", label: t("nav.export") },
+    { value: "Transit", label: t("nav.transit") },
+  ];
+  const periodOptions: FilterDropdownOption[] = [
+    { value: "2024-03", label: "March 2024" },
+    { value: "2024-02", label: "February 2024" },
+    { value: "2024-01", label: "January 2024" },
+  ];
 
   return (
     <div className={shellClasses}>
       <div className="absolute inset-0 z-0">
-        <TradeMap />
+        <TradeMap mapPoints={data.mapPoints} />
       </div>
 
       <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(circle_at_top,_rgba(8,145,178,0.08),_transparent_32%),linear-gradient(180deg,_rgba(2,6,23,0.05)_0%,_rgba(2,6,23,0.08)_18%,_rgba(2,6,23,0.18)_52%,_rgba(2,6,23,0.46)_100%)]" />
@@ -185,6 +205,9 @@ export default function DashboardPage() {
             onTradeTypeChange={setTradeType}
             onPeriodChange={setPeriod}
             countries={data.topCountries}
+            countryOptions={countryOptions}
+            tradeTypeOptions={tradeTypeOptions}
+            periodOptions={periodOptions}
           />
         </div>
       </div>
