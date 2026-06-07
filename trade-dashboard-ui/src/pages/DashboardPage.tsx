@@ -169,7 +169,7 @@ export default function DashboardPage() {
   return (
     <div className={shellClasses}>
       <div className="absolute inset-0 z-0">
-        <TradeMap mapPoints={data.mapPoints} />
+        <TradeMap mapPoints={data.mapPoints ?? []} />
       </div>
 
       <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(circle_at_top,_rgba(8,145,178,0.08),_transparent_32%),linear-gradient(180deg,_rgba(2,6,23,0.05)_0%,_rgba(2,6,23,0.08)_18%,_rgba(2,6,23,0.18)_52%,_rgba(2,6,23,0.46)_100%)]" />

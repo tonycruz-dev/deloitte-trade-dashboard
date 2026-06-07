@@ -6,6 +6,6 @@ namespace Deloitte.TradeDashboard.Application.Models;
 
 public class CountryMetricDto
 {
-	public string Country { get; set; }
+	public string Country { get; set; } = string.Empty;
 	public int Value { get; set; }
 }
