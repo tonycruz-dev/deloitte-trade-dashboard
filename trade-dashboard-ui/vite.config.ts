@@ -11,6 +11,7 @@ export default defineConfig({
     chunkSizeWarningLimit: 2000,
     emptyOutDir: true,
   },
+  envPrefix: ["VITE_", "NEXT_PUBLIC_"],
   plugins: [
     react(),
     tailwindcss(),

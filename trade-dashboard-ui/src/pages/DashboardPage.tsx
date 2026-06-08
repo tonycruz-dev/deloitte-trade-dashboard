@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import type { HubConnection } from "@microsoft/signalr";
 import { useTranslation } from "react-i18next";
-import {
-  getDashboard,
-  simulateDashboardUpdate,
-} from "../api/dashboardApi";
+import { getDashboard, simulateDashboardUpdate } from "../api/dashboardApi";
 import BottomCountriesPanel from "../components/BottomCountriesPanel";
 import type { FilterDropdownOption } from "../components/FilterDropdown";
 import KpiCard from "../components/KpiCard";
@@ -105,12 +102,12 @@ export default function DashboardPage() {
     let isMounted = true;
 
     async function loadDashboard() {
-    try {
-      setLoading(true);
-      setError("");
-      setSimulateError("");
+      try {
+        setLoading(true);
+        setError("");
+        setSimulateError("");
 
-      const result = await getDashboard(selectedCountry, tradeType, period);
+        const result = await getDashboard(selectedCountry, tradeType, period);
 
         if (isMounted) {
           setData(result);
@@ -154,11 +151,11 @@ export default function DashboardPage() {
                 topCountries:
                   nextDashboard.topCountries?.length > 0
                     ? nextDashboard.topCountries
-                    : previousDashboard?.topCountries ?? [],
+                    : (previousDashboard?.topCountries ?? []),
                 mapPoints:
                   nextDashboard.mapPoints?.length > 0
                     ? nextDashboard.mapPoints
-                    : previousDashboard?.mapPoints ?? [],
+                    : (previousDashboard?.mapPoints ?? []),
               }));
             }
           },
@@ -210,11 +207,11 @@ export default function DashboardPage() {
           topCountries:
             updatedDashboard.topCountries?.length > 0
               ? updatedDashboard.topCountries
-              : previousDashboard?.topCountries ?? [],
+              : (previousDashboard?.topCountries ?? []),
           mapPoints:
             updatedDashboard.mapPoints?.length > 0
               ? updatedDashboard.mapPoints
-              : previousDashboard?.mapPoints ?? [],
+              : (previousDashboard?.mapPoints ?? []),
         }));
       }
     } catch {
@@ -291,19 +288,19 @@ export default function DashboardPage() {
 
   return (
     <div className={shellClasses}>
-      <div className="absolute inset-0 z-0">
+      <div className="pointer-events-auto absolute inset-0 z-0">
         <TradeMap mapPoints={data.mapPoints ?? []} />
       </div>
 
       <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(circle_at_top,_rgba(8,145,178,0.07),_transparent_36%),linear-gradient(180deg,_rgba(2,6,23,0.02)_0%,_rgba(2,6,23,0.05)_20%,_rgba(2,6,23,0.12)_52%,_rgba(2,6,23,0.28)_100%)]" />
       <div className="pointer-events-none absolute inset-y-0 left-0 z-[1] w-[22%] bg-gradient-to-r from-slate-950/10 via-slate-950/3 to-transparent" />
 
-      <div className="relative z-10 min-h-screen">
-        <div className="absolute inset-x-0 top-0 px-3 pt-3 sm:px-4 lg:px-6">
+      <div className="pointer-events-none relative z-10 min-h-screen">
+        <div className="pointer-events-auto absolute inset-x-0 top-0 px-3 pt-3 sm:px-4 lg:px-6">
           <TopNavigation />
         </div>
 
-        <div className="absolute right-3 top-[11.75rem] z-20 w-[min(34rem,calc(100%-1.5rem))] px-0 sm:right-10 sm:w-[min(38rem,calc(100%-5rem))] lg:right-20 lg:top-[12.2rem] xl:right-28">
+        <div className="pointer-events-auto absolute right-3 top-[11.75rem] z-20 w-[min(34rem,calc(100%-1.5rem))] px-0 sm:right-10 sm:w-[min(38rem,calc(100%-5rem))] lg:right-20 lg:top-[12.2rem] xl:right-28">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
             <div
               className={`inline-flex items-center rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] ${getConnectionStatusClasses(
@@ -342,7 +339,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="absolute inset-x-0 bottom-0 z-20 px-3 pb-3 sm:px-4 lg:px-6">
+        <div className="pointer-events-auto absolute inset-x-0 bottom-0 z-20 px-3 pb-3 sm:px-4 lg:px-6">
           <BottomCountriesPanel
             periodLabel={periodLabel}
             selectedCountry={selectedCountry}
