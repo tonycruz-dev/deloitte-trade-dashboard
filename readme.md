@@ -483,6 +483,12 @@ dotnet build
 dotnet run --project Deloitte.TradeDashboard.Api
 ```
 
+## Running Backend Tests
+
+```bash
+dotnet test
+```
+
 The API hosts:
 
 - REST endpoints under `/api`
