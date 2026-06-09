@@ -2,6 +2,7 @@
 
 ## Project Overview
 
+
 Deloitte Trade Dashboard is a full-stack trade intelligence application created as a technical assessment to demonstrate practical engineering capability across backend architecture, frontend experience design, real-time communication, and deployment readiness.
 
 The application presents trade performance data through a responsive executive dashboard that combines KPI cards, country rankings, filterable data views, and an interactive Mapbox-powered world map. It is designed to simulate how customs, trade operations, or cross-border logistics teams could monitor declarations, goods value, and country activity from a single operational view.
