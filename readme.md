@@ -337,7 +337,7 @@ Connected clients subscribe to `DashboardUpdated` and refresh KPI cards, top-cou
 
 The main screen combines navigation, KPI cards, a world map, live connection status, filters, and a ranked country panel into a single executive-style operational layout.
 
-![Dashboard Overview](docs/screenshots/dashboard-overview.png)
+![Dashboard Overview](docs/screenshots/milestone-02-filters-and-map.md.jpg)
 
 ### KPI Cards
 
@@ -347,7 +347,7 @@ The dashboard highlights total goods value and total customs declarations as top
 
 The Mapbox experience renders live country markers, scaled trade bubbles, route arcs, route glow layers, and a Saudi Arabia origin halo to visually communicate trade flow.
 
-![Dashboard Map](docs/screenshots/dashboard-map.png)
+![Dashboard Map](docs/screenshots/milestone-02-filters-and-map.md.jpg)
 
 ### Trade Routes
 
@@ -369,7 +369,7 @@ The dashboard supports:
 - Trade type filter.
 - Period filter.
 
-![Dashboard Live Updates](docs/screenshots/dashboard-live-updates.png)
+![Dashboard Live Updates](docs/screenshots/milestone-02-filters-and-map.md.jpg)
 
 ## Real-Time Updates
 
